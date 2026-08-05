@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # VoteChain Zero
 
 A zero-error, blockchain-backed e-voting system built with Spring Boot + PostgreSQL.
@@ -71,3 +72,7 @@ mvn spring-boot:run
 ## Next Step
 Phase 2: design the database schema (entities) and build the core blockchain engine
 (`Block`, `Blockchain`, SHA-256 hashing, Merkle tree, Proof-of-Authority mining).
+=======
+# VoteChain-Zero
+A blockchain-backed voting system It's zero-error friendly, fully explainable, and you don't need external blockchain infra
+>>>>>>> 1fbfc1363b596b4e7b2ae86053f49c659a69e645
