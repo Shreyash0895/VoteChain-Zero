@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: votechain-zero
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/votechain_zero
+    username: votechain_user
+    password: votechain_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # we'll switch to 'validate' + Flyway once schema stabilizes
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com
+    password: your-app-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  port: 8080
+
+# Custom app properties
+votechain:
+  jwt:
+    secret: CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_KEY_IN_PRODUCTION_ENV
+    expiration-ms: 3600000   # 1 hour
+  blockchain:
+    mining-difficulty: 4          # number of leading zeros required in block hash
+    votes-per-block: 5            # how many votes get batched into a block before mining
+  otp:
+    expiry-minutes: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
