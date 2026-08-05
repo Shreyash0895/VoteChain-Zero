@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # VoteChain Zero
 
 A zero-error, blockchain-backed e-voting system built with Spring Boot + PostgreSQL.
@@ -11,23 +10,7 @@ A zero-error, blockchain-backed e-voting system built with Spring Boot + Postgre
 - Springdoc OpenAPI (Swagger UI)
 - Lombok
 
-## Project Structure
-```
-votechain-zero/
-├── pom.xml
-├── docker-compose.yml
-└── src/main/java/com/votechainzero/
-    ├── VoteChainZeroApplication.java
-    ├── config/         # security config, CORS, beans
-    ├── entity/         # JPA entities (Voter, Election, Candidate, Block, VoteTransaction...)
-    ├── repository/     # Spring Data JPA repositories
-    ├── service/        # business logic
-    ├── controller/      # REST controllers
-    ├── security/        # JWT filter, auth provider
-    ├── blockchain/       # core blockchain engine (Block, Chain, Merkle tree, mining)
-    ├── dto/              # request/response objects
-    └── exception/        # custom exceptions + global handler
-```
+
 
 ## Getting Started
 
@@ -75,4 +58,4 @@ Phase 2: design the database schema (entities) and build the core blockchain eng
 =======
 # VoteChain-Zero
 A blockchain-backed voting system It's zero-error friendly, fully explainable, and you don't need external blockchain infra
->>>>>>> 1fbfc1363b596b4e7b2ae86053f49c659a69e645
+
