@@ -31,5 +31,24 @@ services:
     depends_on:
       - postgres
 
+  # Runs the Spring Boot app itself using a Maven image — no local Maven/JDK install needed.
+  # Talks to `postgres` above using the Docker network's internal DNS name.
+  app:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: votechain-app
+    working_dir: /app
+    command: mvn spring-boot:run
+    volumes:
+      - .:/app
+      - maven_repo_cache:/root/.m2   # persists downloaded dependencies across restarts
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/votechain_zero
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   votechain_pgdata:
+  maven_repo_cache:

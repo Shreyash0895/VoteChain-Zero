@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # we'll switch to 'validate' + Flyway once schema stabilizes
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -32,14 +32,13 @@ spring:
 server:
   port: 8080
 
-# Custom app properties
 votechain:
   jwt:
     secret: CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_KEY_IN_PRODUCTION_ENV
-    expiration-ms: 3600000   # 1 hour
+    expiration-ms: 3600000
   blockchain:
-    mining-difficulty: 4          # number of leading zeros required in block hash
-    votes-per-block: 5            # how many votes get batched into a block before mining
+    mining-difficulty: 4
+    votes-per-block: 5
   otp:
     expiry-minutes: 5
 

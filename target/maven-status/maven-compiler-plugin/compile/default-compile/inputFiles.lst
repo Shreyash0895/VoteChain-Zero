@@ -1,0 +1,12 @@
+/app/src/main/java/com/votechainzero/entity/Block.java
+/app/src/main/java/com/votechainzero/entity/Candidate.java
+/app/src/main/java/com/votechainzero/entity/Election.java
+/app/src/main/java/com/votechainzero/entity/VoteTransaction.java
+/app/src/main/java/com/votechainzero/entity/Voter.java
+/app/src/main/java/com/votechainzero/entity/enums/ElectionStatus.java
+/app/src/main/java/com/votechainzero/entity/enums/Role.java
+/app/src/main/java/com/votechainzero/repository/BlockRepository.java
+/app/src/main/java/com/votechainzero/repository/CandidateRepository.java
+/app/src/main/java/com/votechainzero/repository/ElectionRepository.java
+/app/src/main/java/com/votechainzero/repository/VoteTransactionRepository.java
+/app/src/main/java/com/votechainzero/repository/VoterRepository.java
