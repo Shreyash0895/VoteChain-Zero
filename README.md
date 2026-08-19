@@ -2,7 +2,7 @@
 
 A zero-error, blockchain-backed e-voting system built with Spring Boot + PostgreSQL.
 
-## Tech Stack (Phase 1)
+## Tech Stack 
 - Java 21
 - Spring Boot 3.3.2 (Web, Data JPA, Security, Validation, WebSocket, Mail, Actuator)
 - PostgreSQL 16 (via Docker)
@@ -44,18 +44,12 @@ mvn spring-boot:run
 > the build hasn't been compiled/tested here. Run `mvn clean install` on your own
 > machine (with internet access) to pull dependencies and verify the build.
 
-## Roadmap
-- [x] **Phase 1** — Project setup, DB config, folder structure ← *you are here*
-- [ ] **Phase 2** — Entities (Voter, Election, Candidate) + Core blockchain engine (Block, Chain, Merkle tree)
-- [ ] **Phase 3** — Voter auth (JWT + OTP), Election/Candidate admin APIs
-- [ ] **Phase 4** — Vote casting → blockchain transaction, block mining, chain validation, verification API
-- [ ] **Phase 5** — React + Tailwind frontend (voter flow, admin dashboard, blockchain explorer, live results)
-- [ ] **Phase 6** — Extra features (digital signatures, QR voter slips, audit PDF export), Docker deployment
 
-## Next Step
-Phase 2: design the database schema (entities) and build the core blockchain engine
-(`Block`, `Blockchain`, SHA-256 hashing, Merkle tree, Proof-of-Authority mining).
+
+
 =======
 # VoteChain-Zero
 A blockchain-backed voting system It's zero-error friendly, fully explainable, and you don't need external blockchain infra
 
+Work in progress :
+Next step to add block chain library and hashing
