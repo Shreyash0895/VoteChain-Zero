@@ -1,7 +1,4 @@
 com/votechainzero/entity/Candidate$CandidateBuilder.class
-com/votechainzero/entity/Block.class
-com/votechainzero/entity/Candidate.class
-com/votechainzero/repository/ElectionRepository.class
 com/votechainzero/entity/enums/Role.class
 com/votechainzero/entity/VoteTransaction.class
 com/votechainzero/entity/Election.class
@@ -15,3 +12,6 @@ com/votechainzero/entity/Election$ElectionBuilder.class
 com/votechainzero/repository/VoteTransactionRepository.class
 com/votechainzero/entity/Voter$VoterBuilder.class
 com/votechainzero/entity/enums/ElectionStatus.class
+com/votechainzero/entity/Block.class
+com/votechainzero/entity/Candidate.class
+com/votechainzero/repository/ElectionRepository.class

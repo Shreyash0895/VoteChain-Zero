@@ -1,3 +1,8 @@
+/app/src/main/java/com/votechainzero/VoteChainZeroApplication.java
+/app/src/main/java/com/votechainzero/blockchain/BlockchainService.java
+/app/src/main/java/com/votechainzero/blockchain/ChainValidationResult.java
+/app/src/main/java/com/votechainzero/blockchain/HashUtil.java
+/app/src/main/java/com/votechainzero/blockchain/MerkleTree.java
 /app/src/main/java/com/votechainzero/entity/Block.java
 /app/src/main/java/com/votechainzero/entity/Candidate.java
 /app/src/main/java/com/votechainzero/entity/Election.java
