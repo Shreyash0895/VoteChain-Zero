@@ -47,4 +47,4 @@ Two-factor by design — password alone never issues a session token.
 
 All endpoints except `/api/auth/**`, Swagger, and the health check require a valid JWT (`Authorization: Bearer <token>`), enforced statelessly via `JwtAuthFilter` on every request — no server-side session storage.
 
-Authon : Shreyash Jokare
+Author : Shreyash Jokare
