@@ -12,16 +12,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.function.Function;
 
-/**
- * Issues and validates JWTs for logged-in voters/admins.
- *
- * IMPORTANT: this is a completely separate concept from the blockchain's
- * SHA-256 hashing (HashUtil). JWTs authenticate *who is calling the API
- * right now* (a login session). The blockchain hashes authenticate *the
- * integrity of a vote/block once it's recorded*. Don't confuse the two —
- * a JWT proves identity for the duration of a session; a vote's signature
- * proves that specific vote wasn't altered, forever.
- */
+
 @Service
 public class JwtService {
 

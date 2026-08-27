@@ -9,17 +9,7 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-/**
- * A candidate contesting in a specific Election.
- *
- * `voteCount` is a DENORMALIZED cache for fast reads (e.g. live results
- * dashboard) — it is updated only when a block containing votes for this
- * candidate is successfully mined. The real source of truth is always the
- * chain itself (count of VoteTransactions in mined blocks referencing this
- * candidate) — voteCount can be fully rebuilt from the chain at any time,
- * which is exactly what makes tampering detectable: if voteCount and the
- * chain-derived count ever disagree, something was tampered with off-chain.
- */
+
 @Entity
 @Table(name = "candidates")
 @Getter

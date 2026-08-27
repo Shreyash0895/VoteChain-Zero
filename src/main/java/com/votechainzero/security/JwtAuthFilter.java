@@ -19,12 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Runs once per incoming request. Looks for "Authorization: Bearer <token>",
- * and if the token is valid, tells Spring Security who's making the request
- * for the rest of the request lifecycle (so @PreAuthorize etc. work in
- * controllers/services downstream).
- */
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {

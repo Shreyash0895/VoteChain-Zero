@@ -53,11 +53,7 @@ public class Election {
     @Builder.Default
     private List<Candidate> candidates = new ArrayList<>();
 
-    /**
-     * The blockchain for this election, ordered by blockIndex.
-     * Block 0 is always the genesis block, created the moment the
-     * election is activated.
-     */
+    
     @OneToMany(mappedBy = "election", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Block> blocks = new ArrayList<>();

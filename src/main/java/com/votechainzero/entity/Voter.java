@@ -57,11 +57,7 @@ public class Voter {
     @Builder.Default
     private boolean verified = false;
 
-    /**
-     * Per-election voting state is tracked in VoteTransaction, not here,
-     * since a voter may be eligible across multiple elections. This flag
-     * is a quick global convenience check, not the source of truth.
-     */
+    
     @Builder.Default
     private boolean hasVoted = false;
 

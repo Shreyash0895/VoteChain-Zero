@@ -46,11 +46,7 @@ public class Block {
     @Builder.Default
     private long nonce = 0L;
 
-    /**
-     * Which validator node/authority mined & signed this block.
-     * Used for the Proof-of-Authority consensus model (Tier 2 feature) —
-     * for now this is just an identifier (e.g. "SYSTEM" or an admin id).
-     */
+   
     private String validatorId;
 
     @ManyToOne(fetch = FetchType.LAZY)
