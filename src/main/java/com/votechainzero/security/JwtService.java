@@ -2,7 +2,6 @@ package com.votechainzero.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,12 +31,15 @@ public class JwtService {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
 
+        // jjwt 0.12.x: signWith(Key) infers the algorithm from the key type
+        // automatically — no need to pass SignatureAlgorithm explicitly
+        // (that overload is deprecated as of 0.12).
         return Jwts.builder()
                 .subject(voterId.toString())
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiry)
-                .signWith(signingKey(), SignatureAlgorithm.HS256)
+                .signWith(signingKey())
                 .compact();
     }
 
