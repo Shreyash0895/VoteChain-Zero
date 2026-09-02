@@ -20,4 +20,7 @@ public interface VoteTransactionRepository extends JpaRepository<VoteTransaction
     List<VoteTransaction> findByBlockId(UUID blockId);
 
     long countByElectionIdAndCandidateIdAndMinedTrue(UUID electionId, UUID candidateId);
+
+   
+    long countByElectionIdAndCandidateIdAndMinedFalse(UUID electionId, UUID candidateId);
 }
