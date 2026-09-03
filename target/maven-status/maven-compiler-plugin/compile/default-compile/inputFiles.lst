@@ -5,7 +5,13 @@
 /app/src/main/java/com/votechainzero/blockchain/MerkleTree.java
 /app/src/main/java/com/votechainzero/config/SecurityConfig.java
 /app/src/main/java/com/votechainzero/controller/AuthController.java
+/app/src/main/java/com/votechainzero/controller/CandidateController.java
+/app/src/main/java/com/votechainzero/controller/ElectionController.java
+/app/src/main/java/com/votechainzero/dto/AddCandidateRequest.java
 /app/src/main/java/com/votechainzero/dto/AuthResponse.java
+/app/src/main/java/com/votechainzero/dto/CandidateResponse.java
+/app/src/main/java/com/votechainzero/dto/CreateElectionRequest.java
+/app/src/main/java/com/votechainzero/dto/ElectionResponse.java
 /app/src/main/java/com/votechainzero/dto/LoginRequest.java
 /app/src/main/java/com/votechainzero/dto/OtpVerifyRequest.java
 /app/src/main/java/com/votechainzero/dto/RegisterRequest.java
@@ -24,4 +30,6 @@
 /app/src/main/java/com/votechainzero/security/JwtAuthFilter.java
 /app/src/main/java/com/votechainzero/security/JwtService.java
 /app/src/main/java/com/votechainzero/service/AuthService.java
+/app/src/main/java/com/votechainzero/service/CandidateService.java
+/app/src/main/java/com/votechainzero/service/ElectionService.java
 /app/src/main/java/com/votechainzero/service/OtpService.java
