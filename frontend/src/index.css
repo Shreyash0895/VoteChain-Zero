@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ink text-paper font-sans antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  /* A single ruled line, like a ledger register — used to separate entries */
+  .ledger-rule {
+    @apply border-t border-rule;
+  }
+
+  .btn-primary {
+    @apply bg-brass text-ink font-sans font-medium px-5 py-2.5 rounded-sm
+           hover:bg-brass-dim transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply border border-rule text-paper font-sans px-5 py-2.5 rounded-sm
+           hover:border-paper-dim transition-colors disabled:opacity-40;
+  }
+
+  .field-input {
+    @apply w-full bg-surface border border-rule rounded-sm px-4 py-2.5
+           text-paper placeholder:text-paper-dim/60
+           focus:outline-none focus:border-brass transition-colors;
+  }
+
+  .field-label {
+    @apply block text-sm text-paper-dim mb-1.5;
+  }
+}
