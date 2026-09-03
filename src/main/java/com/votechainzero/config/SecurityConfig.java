@@ -24,13 +24,13 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/auth/**",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/actuator/health"
-    };
-
+   private static final String[] PUBLIC_ENDPOINTS = {
+        "/api/auth/**",
+        "/swagger-ui.html",
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/actuator/health"
+};
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
