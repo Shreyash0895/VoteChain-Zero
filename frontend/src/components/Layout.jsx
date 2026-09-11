@@ -1,13 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-/**
- * Shared page shell. The header reads like a ledger's title plate: brand
- * mark on the left, a single ruled line beneath the whole header (not a
- * boxed nav bar), and the voter's status on the right.
- */
 export default function Layout({ children }) {
-  const { voter, isAuthenticated, logout } = useAuth()
+  const { voter, isAuthenticated, isAdmin, logout } = useAuth()
   const navigate = useNavigate()
 
   function handleLogout() {
@@ -17,7 +12,7 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="ledger-rule border-b">
+      <header className="border-b border-rule">
         <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
           <Link to="/" className="flex items-baseline gap-2">
             <span className="font-serif text-xl font-semibold tracking-tight">VoteChain</span>
@@ -25,7 +20,15 @@ export default function Layout({ children }) {
           </Link>
 
           {isAuthenticated ? (
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-5 text-sm">
+              <Link to="/elections" className="text-paper-dim hover:text-paper transition-colors">
+                Elections
+              </Link>
+              {isAdmin && (
+                <Link to="/admin/elections" className="text-paper-dim hover:text-paper transition-colors">
+                  Admin
+                </Link>
+              )}
               <span className="text-paper-dim">
                 {voter?.fullName} <span className="text-paper-dim/60">· {voter?.role}</span>
               </span>

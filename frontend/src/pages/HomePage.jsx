@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function HomePage() {
-  const { voter, isAuthenticated } = useAuth()
+  const { voter, isAuthenticated, isAdmin } = useAuth()
 
   if (!isAuthenticated) {
     return (
@@ -20,10 +20,15 @@ export default function HomePage() {
     <div>
       <h1 className="text-4xl font-semibold mb-2">Welcome, {voter?.fullName}</h1>
       <p className="text-paper-dim mb-8 font-mono text-sm">Role: {voter?.role}</p>
-      <div className="border-t border-rule pt-6">
+      <div className="border-t border-rule pt-6 flex gap-3">
         <Link to="/elections" className="btn-primary inline-block">
           View elections
         </Link>
+        {isAdmin && (
+          <Link to="/admin/elections" className="btn-secondary inline-block">
+            Manage elections
+          </Link>
+        )}
       </div>
     </div>
   )
