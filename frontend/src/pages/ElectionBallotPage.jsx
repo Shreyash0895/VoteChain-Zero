@@ -55,9 +55,14 @@ export default function ElectionBallotPage() {
 
   return (
     <div>
-      <Link to="/elections" className="text-sm text-paper-dim hover:text-paper mb-6 inline-block">
-        ← Back to elections
-      </Link>
+      <div className="flex items-center justify-between mb-6">
+        <Link to="/elections" className="text-sm text-paper-dim hover:text-paper">
+          ← Back to elections
+        </Link>
+        <Link to={`/elections/${electionId}/results`} className="text-sm text-brass hover:underline">
+          View live results →
+        </Link>
+      </div>
 
       <h1 className="text-3xl font-semibold mb-1">{election.title}</h1>
       {election.description && <p className="text-paper-dim mb-2">{election.description}</p>}

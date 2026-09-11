@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import VerifyOtpPage from './pages/VerifyOtpPage'
 import ElectionsPage from './pages/ElectionsPage'
 import ElectionBallotPage from './pages/ElectionBallotPage'
+import ResultsPage from './pages/ResultsPage'
 import AdminElectionsPage from './pages/AdminElectionsPage'
 import CreateElectionPage from './pages/CreateElectionPage'
 import ManageElectionPage from './pages/ManageElectionPage'
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="/verify-otp" element={<VerifyOtpPage />} />
             <Route path="/elections" element={<ElectionsPage />} />
             <Route path="/elections/:electionId" element={<ElectionBallotPage />} />
+            <Route path="/elections/:electionId/results" element={<ResultsPage />} />
             <Route path="/admin/elections" element={<AdminElectionsPage />} />
             <Route path="/admin/elections/new" element={<CreateElectionPage />} />
             <Route path="/admin/elections/:electionId" element={<ManageElectionPage />} />
