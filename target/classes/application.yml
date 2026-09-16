@@ -38,6 +38,7 @@ votechain:
   blockchain:
     mining-difficulty: 4
     votes-per-block: 5
+    integrity-check-interval-ms: 60000   # how often the scheduled tamper-check re-validates every ACTIVE chain
   otp:
     expiry-minutes: 5
 
