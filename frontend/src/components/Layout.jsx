@@ -13,7 +13,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-rule">
-        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
           <Link to="/" className="flex items-baseline gap-2">
             <span className="font-serif text-xl font-semibold tracking-tight">VoteChain</span>
             <span className="font-mono text-xs text-brass">ZERO</span>
@@ -49,10 +49,10 @@ export default function Layout({ children }) {
         </div>
       </header>
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-12">{children}</main>
+      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-16">{children}</main>
 
       <footer className="border-t border-rule">
-        <div className="max-w-4xl mx-auto px-6 py-6 text-xs text-paper-dim/60 font-mono">
+        <div className="max-w-6xl mx-auto px-6 py-6 text-xs text-paper-dim/60 font-mono">
           Every vote is a signed entry on an append-only chain.
         </div>
       </footer>
