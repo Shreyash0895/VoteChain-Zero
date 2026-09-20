@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import client, { extractErrorMessage } from '../api/client'
+import { useAuth } from '../context/AuthContext'
 import BrandPanel from '../components/BrandPanel'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,8 +20,9 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      await client.post('/api/auth/login', form)
-      navigate('/verify-otp', { state: { email: form.email, mode: 'login' } })
+      const res = await client.post('/api/auth/login', form)
+      login(res.data)
+      navigate('/')
     } catch (err) {
       setError(extractErrorMessage(err))
     } finally {
@@ -31,13 +34,13 @@ export default function LoginPage() {
     <div className="grid md:grid-cols-2 gap-16 items-start">
       <BrandPanel
         eyebrow="/ log in"
-        title="Two factors, every time."
-        description="Your password alone never issues a session. A fresh one-time code is required on every login — no exceptions, even for admins."
+        title="Welcome back."
+        description="Every vote you cast is a signed, tamper-evident entry — verifiable by you, any time, in the blockchain explorer."
       />
 
       <div>
         <h1 className="text-3xl font-semibold mb-2">Log in</h1>
-        <p className="text-paper-dim mb-8">We'll email you a one-time code as a second factor.</p>
+        <p className="text-paper-dim mb-8">Enter your email and password to continue.</p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
@@ -53,7 +56,7 @@ export default function LoginPage() {
           {error && <p className="text-signal text-sm">{error}</p>}
 
           <button type="submit" disabled={loading} className="btn-primary w-full">
-            {loading ? 'Checking…' : 'Continue'}
+            {loading ? 'Logging in…' : 'Log in'}
           </button>
         </form>
 

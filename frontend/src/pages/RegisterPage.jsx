@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import client, { extractErrorMessage } from '../api/client'
+import { useAuth } from '../context/AuthContext'
 import BrandPanel from '../components/BrandPanel'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [form, setForm] = useState({ fullName: '', email: '', password: '', governmentId: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,8 +20,10 @@ export default function RegisterPage() {
     setError('')
     setLoading(true)
     try {
-      await client.post('/api/auth/register', form)
-      navigate('/verify-otp', { state: { email: form.email, mode: 'register' } })
+      // Backend now returns a JWT directly — registering logs you straight in.
+      const res = await client.post('/api/auth/register', form)
+      login(res.data)
+      navigate('/')
     } catch (err) {
       setError(extractErrorMessage(err))
     } finally {
