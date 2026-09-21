@@ -19,8 +19,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: your-email@gmail.com
-    password: your-app-password
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_APP_PASSWORD}
     properties:
       mail:
         smtp:
@@ -38,9 +38,14 @@ votechain:
   blockchain:
     mining-difficulty: 4
     votes-per-block: 5
-    integrity-check-interval-ms: 60000   # how often the scheduled tamper-check re-validates every ACTIVE chain
+    integrity-check-interval-ms: 60000
   otp:
     expiry-minutes: 5
+  admin:
+    # Seeded once on startup by AdminSeeder — see .env for the real values.
+    # Defaults below are placeholders only, meant to be overridden.
+    email: ${ADMIN_EMAIL:admin@votechain.local}
+    password: ${ADMIN_PASSWORD:ChangeMe123!}
 
 management:
   endpoints:
@@ -49,7 +54,7 @@ management:
         include: health,info
   health:
     mail:
-      enabled: false   # placeholder credentials fail this check and drag the whole /actuator/health to DOWN — re-enable once real SMTP creds are set
+      enabled: true
 
 springdoc:
   swagger-ui:
