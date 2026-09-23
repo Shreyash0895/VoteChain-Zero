@@ -4,6 +4,7 @@
 /app/src/main/java/com/votechainzero/blockchain/ChainValidationResult.java
 /app/src/main/java/com/votechainzero/blockchain/HashUtil.java
 /app/src/main/java/com/votechainzero/blockchain/MerkleTree.java
+/app/src/main/java/com/votechainzero/config/AdminSeeder.java
 /app/src/main/java/com/votechainzero/config/SecurityConfig.java
 /app/src/main/java/com/votechainzero/controller/AuthController.java
 /app/src/main/java/com/votechainzero/controller/CandidateController.java
