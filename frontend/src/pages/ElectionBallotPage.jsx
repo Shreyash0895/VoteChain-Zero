@@ -1,17 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import client, { extractErrorMessage } from '../api/client'
+import CandidateAvatar from '../components/CandidateAvatar'
 
-/**
- * The actual ballot. Candidates render as selectable ledger rows (not
- * decorative cards with shadows) — picking one is a deliberate act, so
- * the selected state uses the brass accent as a literal marked entry,
- * echoing how a paper ballot gets marked.
- *
- * After voting, the receipt is the payoff moment: the transaction hash
- * in mono type is the voter's actual proof-of-vote, so it's given real
- * visual weight rather than buried in a toast.
- */
 export default function ElectionBallotPage() {
   const { electionId } = useParams()
   const [election, setElection] = useState(null)
@@ -40,7 +31,7 @@ export default function ElectionBallotPage() {
         candidateId: selectedCandidateId,
       })
       setReceipt(res.data)
-      await loadElection() // refresh live totals to include this vote
+      await loadElection()
     } catch (err) {
       setError(extractErrorMessage(err))
     } finally {
@@ -107,7 +98,8 @@ export default function ElectionBallotPage() {
                     disabled:cursor-not-allowed`}
                 >
                   <div className="flex items-center gap-4">
-                    <span className={`w-4 h-4 rounded-full border ${selected ? 'bg-brass border-brass' : 'border-rule'}`} />
+                    <span className={`w-4 h-4 rounded-full border flex-shrink-0 ${selected ? 'bg-brass border-brass' : 'border-rule'}`} />
+                    <CandidateAvatar name={candidate.name} symbolUrl={candidate.symbolUrl} />
                     <div>
                       <p className="font-serif text-lg">{candidate.name}</p>
                       <p className="text-sm text-paper-dim">{candidate.party}</p>

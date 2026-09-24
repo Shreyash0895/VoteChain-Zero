@@ -4,16 +4,13 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import client, { extractErrorMessage } from '../api/client'
+import CandidateAvatar from '../components/CandidateAvatar'
 
 const BRASS = '#C9A227'
 const TEAL = '#3EC9B0'
 const RULE = '#2B323D'
 const PAPER_DIM = '#9AA0AC'
 
-/** Renders the exact mined+pending split each candidate carries — see
- * CandidateResponse.java — as a stacked bar, so the chart itself shows
- * the batching behavior (confirmed vs still-in-mempool) rather than
- * hiding it behind a single misleading number. */
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   const mined = payload.find((p) => p.dataKey === 'minedVotes')?.value ?? 0
@@ -42,8 +39,6 @@ export default function ResultsPage() {
 
   useEffect(() => {
     loadElection().finally(() => setLoading(false))
-    // Poll for live updates — votes get mined in batches on the backend,
-    // so a fresh fetch periodically is what makes this feel "live".
     const interval = setInterval(loadElection, 5000)
     return () => clearInterval(interval)
   }, [electionId])
@@ -80,12 +75,15 @@ export default function ResultsPage() {
       ) : (
         <>
           {leader && (
-            <div className="border border-rule rounded-sm p-6 bg-surface mb-10">
-              <p className="font-mono text-xs text-brass mb-1">currently leading</p>
-              <p className="font-serif text-2xl">{leader.name}</p>
-              <p className="text-paper-dim text-sm">
-                {leader.totalVotes} votes · {((leader.totalVotes / totalAllVotes) * 100).toFixed(1)}%
-              </p>
+            <div className="border border-rule rounded-sm p-6 bg-surface mb-10 flex items-center gap-4">
+              <CandidateAvatar name={leader.name} symbolUrl={leader.symbolUrl} size={52} />
+              <div>
+                <p className="font-mono text-xs text-brass mb-1">currently leading</p>
+                <p className="font-serif text-2xl">{leader.name}</p>
+                <p className="text-paper-dim text-sm">
+                  {leader.totalVotes} votes · {((leader.totalVotes / totalAllVotes) * 100).toFixed(1)}%
+                </p>
+              </div>
             </div>
           )}
 
@@ -116,9 +114,12 @@ export default function ResultsPage() {
           <div className="border-t border-rule">
             {candidates.map((c) => (
               <div key={c.id} className="flex items-center justify-between py-4 border-b border-rule">
-                <div>
-                  <p className="font-serif">{c.name}</p>
-                  <p className="text-sm text-paper-dim">{c.party}</p>
+                <div className="flex items-center gap-4">
+                  <CandidateAvatar name={c.name} symbolUrl={c.symbolUrl} size={36} />
+                  <div>
+                    <p className="font-serif">{c.name}</p>
+                    <p className="text-sm text-paper-dim">{c.party}</p>
+                  </div>
                 </div>
                 <span className="font-mono text-sm text-paper-dim">
                   {c.totalVotes} · {totalAllVotes > 0 ? ((c.totalVotes / totalAllVotes) * 100).toFixed(1) : '0.0'}%
