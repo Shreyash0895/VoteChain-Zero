@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,7 +37,6 @@ public class BlockchainService {
     @Value("${votechain.blockchain.votes-per-block}")
     private int votesPerBlock;
 
-    
     @Transactional
     public Block createGenesisBlock(Election election, String validatorId) {
         if (blockRepository.countByElectionId(election.getId()) > 0) {
@@ -60,7 +60,6 @@ public class BlockchainService {
         return saved;
     }
 
-   
     @Transactional
     public VoteTransaction castVote(Election election, String voterHash, UUID candidateId, String signature) {
         if (voteTransactionRepository.existsByElectionIdAndVoterHash(election.getId(), voterHash)) {
@@ -94,8 +93,6 @@ public class BlockchainService {
         return saved;
     }
 
-   
-    
     @Transactional
     public Optional<Block> mineBlock(Election election, String validatorId) {
         List<VoteTransaction> pending = voteTransactionRepository
@@ -106,7 +103,6 @@ public class BlockchainService {
             return Optional.empty();
         }
 
-        // take up to `votesPerBlock` transactions — anything beyond stays pending for the next block
         List<VoteTransaction> batch = pending.size() > votesPerBlock
                 ? pending.subList(0, votesPerBlock)
                 : pending;
@@ -134,7 +130,6 @@ public class BlockchainService {
 
         Block savedBlock = blockRepository.save(newBlock);
 
-        // link each transaction to the now-mined block and mark it mined
         for (VoteTransaction tx : batch) {
             tx.setBlock(savedBlock);
             tx.setMined(true);
@@ -148,7 +143,6 @@ public class BlockchainService {
         return Optional.of(savedBlock);
     }
 
-    /** Denormalized cache used by the live results dashboard — see Candidate.voteCount javadoc. */
     private void incrementCandidateVoteCount(UUID candidateId) {
         Candidate candidate = candidateRepository.findById(candidateId)
                 .orElseThrow(() -> new IllegalStateException("Candidate not found: " + candidateId));
@@ -156,7 +150,6 @@ public class BlockchainService {
         candidateRepository.save(candidate);
     }
 
-   
     private void mineProofOfWork(Block block) {
         String hash;
         long nonce = 0L;
@@ -169,10 +162,23 @@ public class BlockchainService {
         block.setHash(hash);
     }
 
-    /** The single formula for "what is this block's hash" — used both when mining and when validating. */
+    /**
+     * FIXED: previously hashed block.getTimestamp().toString() directly,
+     * which is unstable — a LocalDateTime's toString() can come back with
+     * different fractional-second precision after a round-trip through
+     * Postgres than it had in memory right before saving. That made
+     * validateChain() wrongly flag untouched blocks as "tampered" the
+     * moment they were re-read from the database.
+     *
+     * Fix: hash the timestamp's epoch-millisecond value instead — a plain
+     * number with no formatting ambiguity, identical whether it's fresh
+     * in memory or reloaded from the DB.
+     */
     private String computeBlockHash(Block block) {
+        long timestampMillis = block.getTimestamp().toInstant(ZoneOffset.UTC).toEpochMilli();
+
         String raw = block.getBlockIndex()
-                + block.getTimestamp().toString()
+                + String.valueOf(timestampMillis)
                 + block.getPreviousHash()
                 + block.getMerkleRoot()
                 + block.getNonce();
