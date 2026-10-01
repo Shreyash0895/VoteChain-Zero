@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import client, { extractErrorMessage } from '../api/client'
 import CandidateAvatar from '../components/CandidateAvatar'
+import { getElectionPhase } from '../utils/electionPhase'
+
+const PHASE_MESSAGE = {
+  DRAFT: 'This election is still being set up by an admin — not open yet.',
+  SCHEDULED: (election) =>
+    `Voting opens ${new Date(election.startTime).toLocaleString()}.`,
+  CLOSED: 'Voting has closed for this election.',
+}
 
 export default function ElectionBallotPage() {
   const { electionId } = useParams()
@@ -42,7 +50,8 @@ export default function ElectionBallotPage() {
   if (loading) return <p className="text-paper-dim font-mono text-sm">Loading ballot…</p>
   if (!election) return <p className="text-signal text-sm">{error || 'Election not found.'}</p>
 
-  const votingOpen = election.status === 'ACTIVE'
+  const phase = getElectionPhase(election)
+  const votingOpen = phase === 'OPEN'
 
   return (
     <div>
@@ -62,7 +71,9 @@ export default function ElectionBallotPage() {
 
       <h1 className="text-3xl font-semibold mb-1">{election.title}</h1>
       {election.description && <p className="text-paper-dim mb-2">{election.description}</p>}
-      <p className="font-mono text-xs uppercase text-paper-dim/60 mb-10">{election.status}</p>
+      <p className="font-mono text-xs uppercase text-paper-dim/60 mb-10">
+        {phase === 'OPEN' ? 'ACTIVE — voting open' : phase}
+      </p>
 
       {receipt ? (
         <div className="border border-brass rounded-sm p-6 bg-surface">
@@ -81,7 +92,9 @@ export default function ElectionBallotPage() {
         <>
           {!votingOpen && (
             <p className="text-paper-dim text-sm mb-6">
-              Voting isn't open for this election right now.
+              {typeof PHASE_MESSAGE[phase] === 'function'
+                ? PHASE_MESSAGE[phase](election)
+                : PHASE_MESSAGE[phase]}
             </p>
           )}
 
@@ -95,7 +108,7 @@ export default function ElectionBallotPage() {
                   onClick={() => setSelectedCandidateId(candidate.id)}
                   className={`w-full flex items-center justify-between py-5 border-b border-rule px-2 -mx-2 text-left transition-colors
                     ${selected ? 'bg-surface' : 'hover:bg-surface/40'}
-                    disabled:cursor-not-allowed`}
+                    disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   <div className="flex items-center gap-4">
                     <span className={`w-4 h-4 rounded-full border flex-shrink-0 ${selected ? 'bg-brass border-brass' : 'border-rule'}`} />

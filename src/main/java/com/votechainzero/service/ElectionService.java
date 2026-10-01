@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -43,7 +44,6 @@ public class ElectionService {
         return toResponse(saved);
     }
 
-    
     @Transactional
     public ElectionResponse activateElection(UUID electionId, String adminId) {
         Election election = getElectionOrThrow(electionId);
@@ -75,21 +75,42 @@ public class ElectionService {
         return toResponse(electionRepository.save(election));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ElectionResponse getElection(UUID electionId) {
         return toResponse(getElectionOrThrow(electionId));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ElectionResponse> listElections() {
         return electionRepository.findAll().stream()
+                .map(this::autoCloseIfExpired)
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
     private Election getElectionOrThrow(UUID electionId) {
-        return electionRepository.findById(electionId)
+        Election election = electionRepository.findById(electionId)
                 .orElseThrow(() -> new IllegalArgumentException("Election not found: " + electionId));
+        return autoCloseIfExpired(election);
+    }
+
+    /**
+     * Fixes the "status still says ACTIVE after the end time has passed"
+     * bug: status only ever changed when an admin manually clicked Close.
+     * Now, any time an election is read (list or single view), we check
+     * whether its endTime has already passed and — if so — flip it to
+     * CLOSED right then, before returning it. This gives an immediate,
+     * correct label the moment anyone looks, rather than waiting for the
+     * next scheduled background check (see ElectionLifecycleMonitor,
+     * which covers elections nobody happens to be viewing).
+     */
+    private Election autoCloseIfExpired(Election election) {
+        if (election.getStatus() == ElectionStatus.ACTIVE
+                && election.getEndTime().isBefore(LocalDateTime.now())) {
+            election.setStatus(ElectionStatus.CLOSED);
+            return electionRepository.save(election);
+        }
+        return election;
     }
 
     private ElectionResponse toResponse(Election election) {
@@ -108,7 +129,6 @@ public class ElectionService {
                 .build();
     }
 
-    
     private CandidateResponse toCandidateResponse(UUID electionId, Candidate candidate) {
         long mined = candidate.getVoteCount();
         long pending = voteTransactionRepository
