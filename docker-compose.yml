@@ -7,6 +7,7 @@ services:
       POSTGRES_DB: votechain_zero
       POSTGRES_USER: votechain_user
       POSTGRES_PASSWORD: votechain_pass
+      TZ: Asia/Kolkata
     ports:
       - "5432:5432"
     volumes:
@@ -41,9 +42,13 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/votechain_zero
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_APP_PASSWORD: ${MAIL_APP_PASSWORD}
-      # Seeds your one admin account on first startup — see .env
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      # Pins the JVM's clock to IST, matching the browser's local time that
+      # datetime-local inputs use when creating elections. Without this,
+      # the container defaults to UTC, causing LocalDateTime.now() on the
+      # backend to disagree with the frontend about whether voting is open.
+      TZ: Asia/Kolkata
     ports:
       - "8080:8080"
     depends_on:
