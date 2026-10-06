@@ -1,18 +1,15 @@
 package com.votechainzero.controller;
 
 import com.votechainzero.dto.ChainStatusResponse;
+import com.votechainzero.dto.TamperSimulationResponse;
 import com.votechainzero.service.ChainExplorerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/** Powers the blockchain explorer — open to any authenticated voter, since
- * transparency of the chain itself is the whole point of using one. */
 @RestController
 @RequestMapping("/api/elections/{electionId}/chain")
 @RequiredArgsConstructor
@@ -23,5 +20,12 @@ public class ChainController {
     @GetMapping
     public ResponseEntity<ChainStatusResponse> getChainStatus(@PathVariable UUID electionId) {
         return ResponseEntity.ok(chainExplorerService.getChainStatus(electionId));
+    }
+
+    /** DEMO ONLY, admin-gated — see ChainExplorerService.simulateTamper() javadoc. */
+    @PostMapping("/simulate-tamper")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<TamperSimulationResponse> simulateTamper(@PathVariable UUID electionId) {
+        return ResponseEntity.ok(chainExplorerService.simulateTamper(electionId));
     }
 }

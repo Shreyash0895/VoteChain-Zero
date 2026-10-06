@@ -1,32 +1,46 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import client, { extractErrorMessage } from '../api/client'
+import { useAuth } from '../context/AuthContext'
 
 function truncateHash(hash) {
   if (!hash) return ''
   return `${hash.slice(0, 10)}…${hash.slice(-8)}`
 }
 
-/**
- * The chain, made visible. Each block is a numbered ledger entry — the
- * numbering here is genuine sequence data (blockIndex), not decorative
- * step-counting. Hashes render in mono type, truncated with the full
- * value available on hover via the title attribute, since a 64-character
- * hex string has no value being fully readable at a glance.
- */
 export default function ChainExplorerPage() {
   const { electionId } = useParams()
+  const { isAdmin } = useAuth()
   const [chain, setChain] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [tampering, setTampering] = useState(false)
+  const [tamperMessage, setTamperMessage] = useState('')
 
-  useEffect(() => {
-    client
+  function loadChain() {
+    return client
       .get(`/api/elections/${electionId}/chain`)
       .then((res) => setChain(res.data))
       .catch((err) => setError(extractErrorMessage(err)))
-      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    loadChain().finally(() => setLoading(false))
   }, [electionId])
+
+  async function handleSimulateTamper() {
+    setTampering(true)
+    setTamperMessage('')
+    try {
+      const res = await client.post(`/api/elections/${electionId}/chain/simulate-tamper`)
+      setTamperMessage(res.data.message)
+      await loadChain() // refresh immediately so the "issues detected" badge appears live
+    } catch (err) {
+      setTamperMessage(extractErrorMessage(err))
+    } finally {
+      setTampering(false)
+    }
+  }
 
   if (loading) return <p className="text-paper-dim font-mono text-sm">Reading chain…</p>
   if (error) return <p className="text-signal text-sm">{error}</p>
@@ -50,9 +64,23 @@ export default function ChainExplorerPage() {
           </span>
         )}
       </div>
-      <p className="text-paper-dim mb-10 font-mono text-xs">
+      <p className="text-paper-dim mb-6 font-mono text-xs">
         {chain.blocks.length} block{chain.blocks.length === 1 ? '' : 's'} · every hash recomputed and cross-checked on this load
       </p>
+
+      {isAdmin && (
+        <div className="border border-rule rounded-sm p-5 mb-10 bg-surface">
+          <p className="font-mono text-xs text-brass mb-2">/ admin demo</p>
+          <p className="text-sm text-paper-dim mb-4">
+            Simulates an attacker editing a block's data directly in the database — bypassing
+            mining entirely. Use this to demonstrate tamper detection live.
+          </p>
+          <button onClick={handleSimulateTamper} disabled={tampering} className="btn-secondary">
+            {tampering ? 'Tampering…' : 'Simulate tamper on genesis block'}
+          </button>
+          {tamperMessage && <p className="text-sm text-paper-dim mt-3">{tamperMessage}</p>}
+        </div>
+      )}
 
       {!chain.valid && (
         <div className="border border-signal/40 rounded-sm p-5 mb-10 bg-signal/5">

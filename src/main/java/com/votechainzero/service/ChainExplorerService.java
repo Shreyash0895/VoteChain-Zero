@@ -2,8 +2,10 @@ package com.votechainzero.service;
 
 import com.votechainzero.blockchain.BlockchainService;
 import com.votechainzero.blockchain.ChainValidationResult;
+import com.votechainzero.blockchain.HashUtil;
 import com.votechainzero.dto.BlockResponse;
 import com.votechainzero.dto.ChainStatusResponse;
+import com.votechainzero.dto.TamperSimulationResponse;
 import com.votechainzero.entity.Block;
 import com.votechainzero.entity.Election;
 import com.votechainzero.repository.BlockRepository;
@@ -17,13 +19,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Read-only view over an election's chain, for the explorer UI. Reuses
- * BlockchainService.validateChain() directly — this is the SAME check the
- * scheduled ChainIntegrityMonitor runs in the background every minute, just
- * triggered on-demand here so a person can see the result immediately
- * instead of waiting for the next scheduled pass.
- */
 @Service
 @RequiredArgsConstructor
 public class ChainExplorerService {
@@ -50,6 +45,39 @@ public class ChainExplorerService {
                 .valid(validation.isValid())
                 .errors(validation.getErrors())
                 .blocks(blockResponses)
+                .build();
+    }
+
+    /**
+     * DEMO ONLY — deliberately corrupts the genesis block's merkleRoot
+     * directly in the database, WITHOUT re-mining a valid hash to match.
+     * This simulates exactly what the whole chain design defends against:
+     * an attacker who can edit a database row directly, but can't redo the
+     * computationally expensive Proof-of-Work to produce a hash that's
+     * still internally consistent with the tampered data.
+     *
+     * Deliberately bypasses BlockchainService entirely — going through it
+     * would just mine a new, valid block, which defeats the point. This
+     * writes directly via the repository, the same way a real attacker
+     * with raw database access would.
+     */
+    @Transactional
+    public TamperSimulationResponse simulateTamper(UUID electionId) {
+        List<Block> blocks = blockRepository.findByElectionIdOrderByBlockIndexAsc(electionId);
+
+        if (blocks.isEmpty()) {
+            throw new IllegalStateException("This election has no blocks yet to tamper with");
+        }
+
+        Block genesis = blocks.get(0);
+        String fakeMerkleRoot = HashUtil.sha256("TAMPERED-" + System.currentTimeMillis());
+        genesis.setMerkleRoot(fakeMerkleRoot);
+        blockRepository.save(genesis);
+
+        return TamperSimulationResponse.builder()
+                .blockIndex(genesis.getBlockIndex())
+                .message("Block #" + genesis.getBlockIndex() + "'s data was altered directly in the database, "
+                        + "without re-mining. Check the chain explorer to see validation catch it.")
                 .build();
     }
 
