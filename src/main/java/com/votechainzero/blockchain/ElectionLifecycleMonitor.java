@@ -12,21 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Background safety net for closing expired elections. ElectionService
- * already auto-closes an election the moment anyone views it (list or
- * detail) — this job exists for the gap that leaves: an election whose
- * endTime has passed but that nobody happens to be looking at right now
- * would otherwise sit labeled ACTIVE indefinitely until someone does.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class ElectionLifecycleMonitor {
 
     private final ElectionRepository electionRepository;
+    private final BlockchainService blockchainService;
 
-    @Scheduled(fixedRate = 60000) // every 60s — reuses the same cadence as the chain integrity check
+    @Scheduled(fixedRate = 60000)
     @Transactional
     public void closeExpiredElections() {
         List<Election> active = electionRepository.findByStatus(ElectionStatus.ACTIVE);
@@ -36,6 +30,13 @@ public class ElectionLifecycleMonitor {
             if (election.getEndTime().isBefore(now)) {
                 election.setStatus(ElectionStatus.CLOSED);
                 electionRepository.save(election);
+
+                // Same reasoning as ElectionService.closeElection(): flush
+                // whatever's left in the mempool so it doesn't stay
+                // unconfirmed forever just because voting ended before it
+                // hit the votes-per-block threshold.
+                blockchainService.mineAllPending(election, "SYSTEM-AUTOCLOSE");
+
                 log.info("Auto-closed expired election '{}' ({})", election.getTitle(), election.getId());
             }
         }

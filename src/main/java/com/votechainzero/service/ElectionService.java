@@ -72,7 +72,14 @@ public class ElectionService {
         }
 
         election.setStatus(ElectionStatus.CLOSED);
-        return toResponse(electionRepository.save(election));
+        Election saved = electionRepository.save(election);
+
+        // Flush any remaining pending votes into a final block — otherwise
+        // they'd sit unconfirmed forever, since nothing triggers mining
+        // once voting stops. See BlockchainService.mineAllPending() javadoc.
+        blockchainService.mineAllPending(saved, "SYSTEM-CLOSE");
+
+        return toResponse(saved);
     }
 
     @Transactional
@@ -94,21 +101,13 @@ public class ElectionService {
         return autoCloseIfExpired(election);
     }
 
-    /**
-     * Fixes the "status still says ACTIVE after the end time has passed"
-     * bug: status only ever changed when an admin manually clicked Close.
-     * Now, any time an election is read (list or single view), we check
-     * whether its endTime has already passed and — if so — flip it to
-     * CLOSED right then, before returning it. This gives an immediate,
-     * correct label the moment anyone looks, rather than waiting for the
-     * next scheduled background check (see ElectionLifecycleMonitor,
-     * which covers elections nobody happens to be viewing).
-     */
     private Election autoCloseIfExpired(Election election) {
         if (election.getStatus() == ElectionStatus.ACTIVE
                 && election.getEndTime().isBefore(LocalDateTime.now())) {
             election.setStatus(ElectionStatus.CLOSED);
-            return electionRepository.save(election);
+            Election saved = electionRepository.save(election);
+            blockchainService.mineAllPending(saved, "SYSTEM-AUTOCLOSE");
+            return saved;
         }
         return election;
     }

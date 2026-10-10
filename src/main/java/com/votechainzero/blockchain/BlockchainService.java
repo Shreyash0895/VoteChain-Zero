@@ -143,6 +143,25 @@ public class BlockchainService {
         return Optional.of(savedBlock);
     }
 
+    /**
+     * Mines EVERY remaining pending vote for an election, looping until the
+     * mempool is empty — regardless of whether the usual votes-per-block
+     * threshold is met. Call this when an election closes (manually or via
+     * the auto-close lifecycle check): without it, any votes that never
+     * happened to reach the threshold before closing would sit as "pending"
+     * forever, since nothing else ever triggers mining once voting stops.
+     */
+    @Transactional
+    public void mineAllPending(Election election, String validatorId) {
+        int blocksMined = 0;
+        while (mineBlock(election, validatorId).isPresent()) {
+            blocksMined++;
+        }
+        if (blocksMined > 0) {
+            log.info("Flushed {} final block(s) for election {} on close", blocksMined, election.getId());
+        }
+    }
+
     private void incrementCandidateVoteCount(UUID candidateId) {
         Candidate candidate = candidateRepository.findById(candidateId)
                 .orElseThrow(() -> new IllegalStateException("Candidate not found: " + candidateId));
@@ -162,18 +181,6 @@ public class BlockchainService {
         block.setHash(hash);
     }
 
-    /**
-     * FIXED: previously hashed block.getTimestamp().toString() directly,
-     * which is unstable — a LocalDateTime's toString() can come back with
-     * different fractional-second precision after a round-trip through
-     * Postgres than it had in memory right before saving. That made
-     * validateChain() wrongly flag untouched blocks as "tampered" the
-     * moment they were re-read from the database.
-     *
-     * Fix: hash the timestamp's epoch-millisecond value instead — a plain
-     * number with no formatting ambiguity, identical whether it's fresh
-     * in memory or reloaded from the DB.
-     */
     private String computeBlockHash(Block block) {
         long timestampMillis = block.getTimestamp().toInstant(ZoneOffset.UTC).toEpochMilli();
 
