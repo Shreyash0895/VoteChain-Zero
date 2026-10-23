@@ -1,134 +1,151 @@
-import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from 'recharts'
-import client, { extractErrorMessage } from '../api/client'
-import CandidateAvatar from '../components/CandidateAvatar'
+  Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from 'recharts';
+import client from '../api/client';
 
-const BRASS = '#C9A227'
-const TEAL = '#3EC9B0'
-const RULE = '#2B323D'
-const PAPER_DIM = '#9AA0AC'
-
-function CustomTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null
-  const mined = payload.find((p) => p.dataKey === 'minedVotes')?.value ?? 0
-  const pending = payload.find((p) => p.dataKey === 'pendingVotes')?.value ?? 0
-  return (
-    <div className="bg-surface border border-rule rounded-sm px-4 py-3 font-mono text-xs">
-      <p className="font-sans text-paper mb-1">{label}</p>
-      <p className="text-brass">confirmed: {mined}</p>
-      <p className="text-teal">pending: {pending}</p>
-    </div>
-  )
-}
+const POLL_MS = 5000;
 
 export default function ResultsPage() {
-  const { electionId } = useParams()
-  const [election, setElection] = useState(null)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  function loadElection() {
-    return client
-      .get(`/api/elections/${electionId}`)
-      .then((res) => setElection(res.data))
-      .catch((err) => setError(extractErrorMessage(err)))
-  }
+  const { electionId } = useParams();
+  const [election, setElection] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    loadElection().finally(() => setLoading(false))
-    const interval = setInterval(loadElection, 5000)
-    return () => clearInterval(interval)
-  }, [electionId])
+    let alive = true;
+    const load = async () => {
+      try {
+        const { data } = await client.get(`/api/elections/${electionId}`);
+        if (alive) { setElection(data); setError(''); }
+      } catch (e) {
+        if (alive) setError(e?.response?.data?.message || 'Could not load results');
+      }
+    };
+    load();
+    const t = setInterval(load, POLL_MS);
+    return () => { alive = false; clearInterval(t); };
+  }, [electionId]);
 
-  if (loading) return <p className="text-paper-dim font-mono text-sm">Loading results…</p>
-  if (!election) return <p className="text-signal text-sm">{error || 'Election not found.'}</p>
+  if (error && !election) return <p className="mx-auto max-w-5xl px-6 py-16 text-red-400">{error}</p>;
+  if (!election) return <p className="mx-auto max-w-5xl px-6 py-16 opacity-70">Loading results…</p>;
 
-  const candidates = [...election.candidates].sort((a, b) => b.totalVotes - a.totalVotes)
-  const totalAllVotes = candidates.reduce((sum, c) => sum + c.totalVotes, 0)
-  const leader = candidates[0]
+  const candidates = (election.candidates || []).map((c) => ({
+    ...c,
+    confirmed: c.minedVotes ?? 0,
+    pending: c.pendingVotes ?? 0,
+    total: c.totalVotes ?? 0,
+  }));
+  const sorted = [...candidates].sort((a, b) => b.total - a.total);
+  const grandTotal = sorted.reduce((s, c) => s + c.total, 0);
+  const confirmed = sorted.reduce((s, c) => s + c.confirmed, 0);
+  const pending = sorted.reduce((s, c) => s + c.pending, 0);
+  const top = sorted[0];
+  const tied = top ? sorted.filter((c) => c.total === top.total) : [];
+  const margin = sorted.length > 1 ? sorted[0].total - sorted[1].total : sorted[0]?.total ?? 0;
+  const closed = election.status === 'CLOSED';
+  const finalised = closed && pending === 0;
+  const pct = (n) => (grandTotal ? ((n / grandTotal) * 100).toFixed(1) : '0.0');
 
-  const chartData = candidates.map((c) => ({
-    name: c.name,
-    minedVotes: c.minedVotes,
-    pendingVotes: c.pendingVotes,
-  }))
+  let banner;
+  if (grandTotal === 0) {
+    banner = { label: finalised ? 'Result' : 'Status', text: finalised ? 'No votes were cast' : 'No votes cast yet' };
+  } else if (tied.length > 1) {
+    banner = {
+      label: finalised ? 'Result' : 'Currently',
+      text: `${finalised ? 'Tie' : 'Tied'} between ${tied.map((c) => c.name).join(' & ')}`,
+    };
+  } else {
+    banner = {
+      label: finalised ? 'Winner' : 'Currently leading',
+      text: finalised ? `${top.name} (${top.party}) has won the election` : `${top.name} (${top.party})`,
+    };
+  }
+
+  const chartData = sorted.map((c) => ({ name: c.name, Confirmed: c.confirmed, Pending: c.pending }));
 
   return (
-    <div>
-      <Link to={`/admin/elections/${electionId}`} className="text-sm text-paper-dim hover:text-paper mb-6 inline-block">
-        ← Back to ballot
+    <div className="mx-auto max-w-5xl px-6 py-12">
+      <Link to={`/admin/elections/${electionId}`} className="text-sm opacity-70 hover:opacity-100">
+        ← Back to election
       </Link>
 
-      <div className="flex items-center justify-between mb-1">
-        <h1 className="text-3xl font-semibold">{election.title}</h1>
-        <span className="font-mono text-xs uppercase text-paper-dim">{election.status}</span>
+      <div className="mt-6 flex items-start justify-between">
+        <div>
+          <h1 className="font-serif text-4xl">{election.title}</h1>
+          <p className="mt-1 text-sm opacity-60">Admin analytics · refreshes every 5s</p>
+        </div>
+        <span className="font-mono text-xs uppercase tracking-wider opacity-70">{election.status}</span>
       </div>
-      <p className="text-paper-dim mb-10 font-mono text-xs">
-        {totalAllVotes} total vote{totalAllVotes === 1 ? '' : 's'} · refreshes every 5s
-      </p>
 
-      {totalAllVotes === 0 ? (
-        <p className="text-paper-dim">No votes cast yet.</p>
-      ) : (
-        <>
-          {leader && (
-            <div className="border border-rule rounded-sm p-6 bg-surface mb-10 flex items-center gap-4">
-              <CandidateAvatar name={leader.name} symbolUrl={leader.symbolUrl} size={52} />
-              <div>
-                <p className="font-mono text-xs text-brass mb-1">currently leading</p>
-                <p className="font-serif text-2xl">{leader.name}</p>
-                <p className="text-paper-dim text-sm">
-                  {leader.totalVotes} votes · {((leader.totalVotes / totalAllVotes) * 100).toFixed(1)}%
-                </p>
-              </div>
+      <div className={`mt-8 border p-6 ${finalised ? 'border-yellow-600/60' : 'border-white/15'}`}>
+        <p className="font-mono text-xs uppercase tracking-widest opacity-60">{banner.label}</p>
+        <p className="mt-2 font-serif text-3xl">{banner.text}</p>
+        {grandTotal > 0 && tied.length === 1 && (
+          <p className="mt-2 text-sm opacity-70">
+            {top.total} votes · {pct(top.total)}% share · margin of {margin} vote{margin === 1 ? '' : 's'}
+          </p>
+        )}
+        {!finalised && grandTotal > 0 && (
+          <p className="mt-2 text-xs opacity-50">
+            Provisional — the winner is declared once the election is closed and all votes are confirmed.
+          </p>
+        )}
+      </div>
+
+      <div className="mt-8 grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-4">
+        {[
+          ['Total votes', grandTotal],
+          ['Confirmed on chain', confirmed],
+          ['Pending', pending],
+          ['Lead margin', margin],
+        ].map(([k, v]) => (
+          <div key={k} className="bg-[#0f131a] p-5">
+            <p className="font-mono text-xs uppercase opacity-60">{k}</p>
+            <p className="mt-1 font-serif text-3xl">{v}</p>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mt-12 font-serif text-2xl">Votes by candidate</h2>
+      <div className="mt-4 h-72">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
+            <XAxis dataKey="name" stroke="#9ca3af" />
+            <YAxis allowDecimals={false} stroke="#9ca3af" />
+            <Tooltip contentStyle={{ background: '#0f131a', border: '1px solid #ffffff30' }} />
+            <Legend />
+            <Bar dataKey="Confirmed" stackId="a" fill="#c9a24b" />
+            <Bar dataKey="Pending" stackId="a" fill="#2aa198" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <h2 className="mt-12 font-serif text-2xl">Standings</h2>
+      <ul className="mt-4 divide-y divide-white/10 border-y border-white/10">
+        {sorted.map((c, i) => (
+          <li key={c.id} className="py-4">
+            <div className="flex items-baseline justify-between">
+              <span>
+                <span className="font-mono text-sm opacity-50">#{i + 1}</span>{' '}
+                <span className="font-serif text-lg">{c.name}</span>{' '}
+                <span className="text-sm opacity-60">{c.party}</span>
+                {finalised && i === 0 && tied.length === 1 && (
+                  <span className="ml-2 font-mono text-xs text-yellow-500">WINNER</span>
+                )}
+              </span>
+              <span className="font-mono text-sm">
+                {c.total} votes · {pct(c.total)}%
+                {c.pending > 0 && <span className="opacity-60"> ({c.pending} pending)</span>}
+              </span>
             </div>
-          )}
-
-          <div className="h-72 mb-10">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} layout="vertical" margin={{ left: 20 }}>
-                <CartesianGrid horizontal={false} stroke={RULE} />
-                <XAxis type="number" stroke={PAPER_DIM} tick={{ fill: PAPER_DIM, fontSize: 12 }} allowDecimals={false} />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  stroke={PAPER_DIM}
-                  tick={{ fill: PAPER_DIM, fontSize: 13, fontFamily: 'IBM Plex Sans' }}
-                  width={110}
-                />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: RULE, opacity: 0.3 }} />
-                <Bar dataKey="minedVotes" stackId="votes" fill={BRASS} radius={[0, 0, 0, 0]} />
-                <Bar dataKey="pendingVotes" stackId="votes" fill={TEAL} radius={[0, 2, 2, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="flex gap-6 text-xs font-mono text-paper-dim mb-10">
-            <span><span className="inline-block w-2.5 h-2.5 bg-brass mr-2 align-middle" />confirmed on-chain</span>
-            <span><span className="inline-block w-2.5 h-2.5 bg-teal mr-2 align-middle" />pending next block</span>
-          </div>
-
-          <div className="border-t border-rule">
-            {candidates.map((c) => (
-              <div key={c.id} className="flex items-center justify-between py-4 border-b border-rule">
-                <div className="flex items-center gap-4">
-                  <CandidateAvatar name={c.name} symbolUrl={c.symbolUrl} size={36} />
-                  <div>
-                    <p className="font-serif">{c.name}</p>
-                    <p className="text-sm text-paper-dim">{c.party}</p>
-                  </div>
-                </div>
-                <span className="font-mono text-sm text-paper-dim">
-                  {c.totalVotes} · {totalAllVotes > 0 ? ((c.totalVotes / totalAllVotes) * 100).toFixed(1) : '0.0'}%
-                </span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+            <div className="mt-2 h-1.5 bg-white/10">
+              <div className="h-full bg-[#c9a24b]" style={{ width: `${pct(c.total)}%` }} />
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
-  )
+  );
 }
