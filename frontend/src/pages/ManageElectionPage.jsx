@@ -2,12 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import client, { extractErrorMessage } from '../api/client'
 
-/**
- * The admin's working page for a single election: staff it with candidates
- * while DRAFT, then activate (mints the genesis block on the backend) or
- * close it. Vote counts shown here use the same mined/pending/total split
- * as the voter ballot — transparency for the admin too, not just voters.
- */
+
 export default function ManageElectionPage() {
   const { electionId } = useParams()
   const [election, setElection] = useState(null)
@@ -82,9 +77,8 @@ export default function ManageElectionPage() {
 
   return (
     <div>
-      <Link to="/admin/elections" className="text-sm text-paper-dim hover:text-paper mb-6 inline-block">
-        ← Back to elections
-      </Link>
+     <Link to={`/admin/elections/${electionId}/results`}>View live results →</Link>
+    <Link to={`/elections/${electionId}/chain`}>View chain</Link>
 
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-3xl font-semibold">{election.title}</h1>

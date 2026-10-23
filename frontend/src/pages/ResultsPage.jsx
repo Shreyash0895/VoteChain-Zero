@@ -58,7 +58,7 @@ export default function ResultsPage() {
 
   return (
     <div>
-      <Link to={`/elections/${electionId}`} className="text-sm text-paper-dim hover:text-paper mb-6 inline-block">
+      <Link to={`/admin/elections/${electionId}`} className="text-sm text-paper-dim hover:text-paper mb-6 inline-block">
         ← Back to ballot
       </Link>
 

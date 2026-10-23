@@ -1,3 +1,4 @@
+import RequireAdmin from './components/RequireAdmin';
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './components/Layout'
@@ -23,11 +24,11 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/elections" element={<ElectionsPage />} />
             <Route path="/elections/:electionId" element={<ElectionBallotPage />} />
-            <Route path="/elections/:electionId/results" element={<ResultsPage />} />
+            <Route path="/admin/elections/:electionId/results" element={<RequireAdmin><ResultsPage /></RequireAdmin>} />
             <Route path="/elections/:electionId/chain" element={<ChainExplorerPage />} />
-            <Route path="/admin/elections" element={<AdminElectionsPage />} />
-            <Route path="/admin/elections/new" element={<CreateElectionPage />} />
-            <Route path="/admin/elections/:electionId" element={<ManageElectionPage />} />
+            <Route path="/admin/elections" element={<RequireAdmin><AdminElectionsPage /></RequireAdmin>} />
+            <Route path="/admin/elections/new" element={<RequireAdmin><CreateElectionPage /></RequireAdmin>} />
+            <Route path="/admin/elections/:electionId" element={<RequireAdmin><ManageElectionPage /></RequireAdmin>} />
           </Routes>
         </Layout>
       </AuthProvider>

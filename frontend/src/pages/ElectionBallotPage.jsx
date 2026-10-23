@@ -63,9 +63,7 @@ export default function ElectionBallotPage() {
           <Link to={`/elections/${electionId}/chain`} className="text-sm text-paper-dim hover:text-paper">
             View chain
           </Link>
-          <Link to={`/elections/${electionId}/results`} className="text-sm text-brass hover:underline">
-            View live results →
-          </Link>
+          
         </div>
       </div>
 
@@ -118,7 +116,7 @@ export default function ElectionBallotPage() {
                       <p className="text-sm text-paper-dim">{candidate.party}</p>
                     </div>
                   </div>
-                  <span className="font-mono text-sm text-paper-dim">{candidate.totalVotes} votes</span>
+                  {/* <span className="font-mono text-sm text-paper-dim">{candidate.totalVotes} votes</span> */}
                 </button>
               )
             })}
