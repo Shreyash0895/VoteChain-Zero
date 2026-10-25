@@ -28,6 +28,7 @@ export default function App() {
             <Route path="/elections/:electionId/chain" element={<ChainExplorerPage />} />
             <Route path="/admin/elections" element={<RequireAdmin><AdminElectionsPage /></RequireAdmin>} />
             <Route path="/admin/elections/new" element={<RequireAdmin><CreateElectionPage /></RequireAdmin>} />
+            <Route path="/verify" element={<VerifyReceiptPage />} />
             <Route path="/admin/elections/:electionId" element={<RequireAdmin><ManageElectionPage /></RequireAdmin>} />
           </Routes>
         </Layout>
