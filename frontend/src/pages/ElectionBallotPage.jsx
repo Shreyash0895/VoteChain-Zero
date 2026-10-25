@@ -63,7 +63,6 @@ export default function ElectionBallotPage() {
           <Link to={`/elections/${electionId}/chain`} className="text-sm text-paper-dim hover:text-paper">
             View chain
           </Link>
-          
         </div>
       </div>
 
@@ -85,6 +84,12 @@ export default function ElectionBallotPage() {
           <p className="text-xs text-paper-dim mt-3">
             {receipt.mined ? 'Already confirmed on-chain.' : 'Pending — will confirm once the next block mines.'}
           </p>
+          <Link
+            to={`/verify?election=${receipt.electionId}&hash=${receipt.transactionHash}`}
+            className="inline-block mt-5 text-sm text-brass hover:underline"
+          >
+            Verify my vote →
+          </Link>
         </div>
       ) : (
         <>
@@ -116,7 +121,6 @@ export default function ElectionBallotPage() {
                       <p className="text-sm text-paper-dim">{candidate.party}</p>
                     </div>
                   </div>
-                  {/* <span className="font-mono text-sm text-paper-dim">{candidate.totalVotes} votes</span> */}
                 </button>
               )
             })}
