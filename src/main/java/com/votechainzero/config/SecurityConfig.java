@@ -20,21 +20,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Central security configuration.
- *
- * - Stateless sessions: every request must carry its own JWT.
- * - CORS: the frontend runs on a different origin (localhost:5173) than
- *   the backend (localhost:8080) during local dev — without explicit CORS
- *   config here, the browser silently blocks every request from the React
- *   app, which axios reports as a generic "Network Error" (not a 401/403 —
- *   the request never even completes). corsConfigurationSource() below is
- *   what allows the Vite dev server's origin through.
- * - Public endpoints: registration, login, OTP verification, Swagger docs.
- *   Everything else requires a valid JWT.
- * - @EnableMethodSecurity turns on @PreAuthorize("hasRole('ADMIN')") on
- *   controller methods.
- */
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

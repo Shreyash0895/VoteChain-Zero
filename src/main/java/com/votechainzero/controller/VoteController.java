@@ -13,13 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-/**
- * Voting endpoints — open to any authenticated voter (no @PreAuthorize
- * role restriction, unlike the admin-only election/candidate endpoints).
- * @AuthenticationPrincipal injects the Voter set by JwtAuthFilter, so the
- * caller's identity comes from their verified JWT, not a request body
- * field — a voter can never vote "as" someone else.
- */
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -33,7 +27,7 @@ public class VoteController {
             @Valid @RequestBody CastVoteRequest request,
             @AuthenticationPrincipal Voter voter
     ) {
-        VoteReceiptResponse receipt = voteService.castVote(electionId, request.getCandidateId(), voter);
+        VoteReceiptResponse receipt = voteService.castVote(electionId, request.getCandidateId(), request.getSignature(), voter);
         return ResponseEntity.status(HttpStatus.CREATED).body(receipt);
     }
 

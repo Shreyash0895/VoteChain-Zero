@@ -1,12 +1,3 @@
-/**
- * Election.status (DRAFT/ACTIVE/CLOSED) is an admin-controlled lifecycle
- * flag — it does NOT mean voting is open right now. An ACTIVE election can
- * still be scheduled for the future (startTime hasn't arrived yet) or,
- * briefly, past its endTime before the backend's auto-close job catches up.
- *
- * This computes the actual, honest phase a voter should see, using the
- * same startTime/endTime data the backend already sends.
- */
 export function getElectionPhase(election) {
   if (election.status === 'DRAFT') return 'DRAFT'
   if (election.status === 'CLOSED') return 'CLOSED'

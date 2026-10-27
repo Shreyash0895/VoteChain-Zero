@@ -10,21 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * The "Zero Error" guarantee, running continuously in the background.
- *
- * Every `integrity-check-interval-ms` (default 60s, see application.yml),
- * this re-walks EVERY ACTIVE election's entire chain from scratch —
- * recomputing every block's hash and merkle root and comparing against
- * what's stored — exactly the same check ChainExplorerService exposes
- * on-demand for the UI. If a block or a mined transaction was ever
- * altered directly in the database (bypassing normal mining), this is
- * what catches it, even if nobody happens to open the explorer page
- * at that moment.
- *
- * Currently this only logs — see the TODO below for where a real alerting
- * mechanism (email, webhook, admin dashboard banner) would plug in.
- */
+
 @Component
 @RequiredArgsConstructor
 @Slf4j

@@ -33,6 +33,11 @@ public class ReceiptVerificationResponse {
     private List<Step> proof;
     private boolean proofValid;
 
+    /** true/false once signed; null for older votes cast before signatures existed. */
+    private Boolean signatureValid;
+    /** Short fingerprint of the signing key (identifies the key, not the person). */
+    private String signerFingerprint;
+
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor

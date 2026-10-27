@@ -1,9 +1,4 @@
-/**
- * The left-side panel on auth pages (and similar) — fills what would
- * otherwise be dead space with the brand voice and a textural motif that
- * reinforces "ledger", without faking live data (no invented block numbers
- * or vote counts here — that's what the real Chain Explorer is for).
- */
+
 export default function BrandPanel({ eyebrow, title, description }) {
   return (
     <div className="hidden md:flex flex-col justify-between border-r border-rule pr-12 py-4">

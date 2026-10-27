@@ -44,6 +44,10 @@ public class VoteTransaction {
     
     private String signature;
 
+    /** Base64 SPKI public key the signature was made with (copied from the voter at cast time). */
+    @Column(length = 1000)
+    private String publicKey;
+
     @Builder.Default
     private boolean mined = false;
 

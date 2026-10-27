@@ -1,6 +1,7 @@
 package com.votechainzero.service;
 
 import com.votechainzero.blockchain.BlockchainService;
+import com.votechainzero.blockchain.SignatureUtil;
 import com.votechainzero.dto.VoteReceiptResponse;
 import com.votechainzero.entity.Election;
 import com.votechainzero.entity.Voter;
@@ -9,6 +10,7 @@ import com.votechainzero.entity.enums.ElectionStatus;
 import com.votechainzero.repository.CandidateRepository;
 import com.votechainzero.repository.ElectionRepository;
 import com.votechainzero.repository.VoteTransactionRepository;
+import com.votechainzero.repository.VoterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * The bridge between the REST layer and BlockchainService.castVote().
- * Reuses the voter's existing voterIdHash (already a one-way hash, set
- * at registration) as the "voterHash" for the blockchain transaction —
- * this is what makes double-vote prevention work while keeping the vote
- * anonymous.
- */
+
 @Service
 @RequiredArgsConstructor
 public class VoteService {
@@ -30,10 +26,11 @@ public class VoteService {
     private final ElectionRepository electionRepository;
     private final CandidateRepository candidateRepository;
     private final VoteTransactionRepository voteTransactionRepository;
+    private final VoterRepository voterRepository;
     private final BlockchainService blockchainService;
 
     @Transactional
-    public VoteReceiptResponse castVote(UUID electionId, UUID candidateId, Voter voter) {
+    public VoteReceiptResponse castVote(UUID electionId, UUID candidateId, String signature, Voter voter) {
         Election election = electionRepository.findById(electionId)
                 .orElseThrow(() -> new IllegalArgumentException("Election not found: " + electionId));
 
@@ -52,11 +49,23 @@ public class VoteService {
             throw new IllegalArgumentException("This candidate is not part of this election");
         }
 
+        // Re-load the voter so we always use the key that is actually stored in the database
+        Voter registered = voterRepository.findById(voter.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Voter not found"));
+        if (registered.getPublicKey() == null) {
+            throw new IllegalStateException("No signing key is registered for this account yet");
+        }
+        String payload = SignatureUtil.payload(electionId, candidateId);
+        if (!SignatureUtil.verify(registered.getPublicKey(), payload, signature)) {
+            throw new IllegalArgumentException("Invalid vote signature — the vote was not signed by this voter's key");
+        }
+
         VoteTransaction transaction = blockchainService.castVote(
                 election,
-                voter.getVoterIdHash(),
+                registered.getVoterIdHash(),
                 candidateId,
-                null
+                signature,
+                registered.getPublicKey()
         );
 
         return VoteReceiptResponse.builder()

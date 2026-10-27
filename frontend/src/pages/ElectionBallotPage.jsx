@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import client, { extractErrorMessage } from '../api/client'
 import CandidateAvatar from '../components/CandidateAvatar'
 import { getElectionPhase } from '../utils/electionPhase'
+import { signVote, currentVoterKey } from '../utils/voteSigner'
 
 const PHASE_MESSAGE = {
   DRAFT: 'This election is still being set up by an admin — not open yet.',
@@ -35,8 +36,14 @@ export default function ElectionBallotPage() {
     setError('')
     setSubmitting(true)
     try {
+      // Sign in the browser — the private key never leaves this device
+      const { publicKey, signature } = await signVote(
+        currentVoterKey(), electionId, selectedCandidateId)
+      await client.put('/api/voters/me/public-key', { publicKey })
+
       const res = await client.post(`/api/elections/${electionId}/votes`, {
         candidateId: selectedCandidateId,
+        signature,
       })
       setReceipt(res.data)
       await loadElection()

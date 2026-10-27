@@ -13,14 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Password-only auth (OTP/2FA removed for simplicity — see git history if
- * you want to bring it back later; OtpService.java is still in the project,
- * just unused).
- *
- * register() and login() both return a JWT directly — registering logs
- * you straight in, no separate verification step.
- */
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {

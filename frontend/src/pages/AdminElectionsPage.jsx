@@ -8,9 +8,7 @@ const STATUS_STYLE = {
   CLOSED: 'text-paper-dim/50',
 }
 
-/** Admin's register — same ledger-row pattern as the voter list, but each
- * row links to management (add candidates / activate / close) instead of
- * a ballot. */
+
 export default function AdminElectionsPage() {
   const [elections, setElections] = useState([])
   const [error, setError] = useState('')

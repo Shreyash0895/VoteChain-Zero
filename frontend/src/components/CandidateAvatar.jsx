@@ -1,11 +1,6 @@
 import { useState } from 'react'
 
-/**
- * Shows a candidate's symbol image if one was set by the admin. Falls back
- * to a simple initials circle if symbolUrl is empty OR if the URL is broken
- * (admin-entered URLs are just text fields on the backend — nothing
- * validates the image actually loads, so a graceful fallback matters).
- */
+
 export default function CandidateAvatar({ name, symbolUrl, size = 44 }) {
   const [failed, setFailed] = useState(false)
 

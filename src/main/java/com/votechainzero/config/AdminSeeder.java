@@ -12,20 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Runs once every time the app starts. If no account exists yet with the
- * configured admin email, it creates one with the ADMIN role — this is
- * the ONLY way an admin account gets created; there's no public "become
- * an admin" endpoint, on purpose.
- *
- * Credentials come from environment variables (see .env / docker-compose.yml),
- * never hardcoded here, for the same reason the mail credentials aren't
- * hardcoded — this file is safe to commit to a public repo.
- *
- * Idempotent: if the admin account already exists (e.g. on every restart),
- * this does nothing and logs a one-line confirmation instead of erroring
- * or creating duplicates.
- */
+
 @Component
 @RequiredArgsConstructor
 @Slf4j

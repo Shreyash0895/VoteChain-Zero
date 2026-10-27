@@ -35,11 +35,7 @@ final class MerkleTree {
         return currentLevel.get(0);
     }
 
-    /**
-     * Builds the proof path for the leaf at {@code index}: the sibling hash at every
-     * level from the leaves up to (but not including) the root. Mirrors
-     * computeMerkleRoot exactly, including duplicating the last node on odd levels.
-     */
+    
     public static List<ProofStep> buildProof(List<String> leaves, int index) {
         List<ProofStep> proof = new ArrayList<>();
         List<String> level = new ArrayList<>(leaves);

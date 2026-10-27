@@ -107,6 +107,14 @@ export default function VerifyReceiptPage() {
             </p>
           </div>
 
+          {result.signatureValid !== null && result.signatureValid !== undefined && (
+            <p className="mt-4 font-mono text-xs opacity-80">
+              {result.signatureValid
+                ? `Digital signature valid ✓ — signed with key ${result.signerFingerprint}`
+                : 'Digital signature INVALID — this vote was altered after it was cast'}
+            </p>
+          )}
+
           <h2 className="mt-8 font-serif text-2xl">How the proof works</h2>
           <ol className="mt-4 space-y-3">
             {steps.map((s, i) => (

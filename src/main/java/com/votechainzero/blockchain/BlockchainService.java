@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -61,7 +62,7 @@ public class BlockchainService {
     }
 
     @Transactional
-    public VoteTransaction castVote(Election election, String voterHash, UUID candidateId, String signature) {
+    public VoteTransaction castVote(Election election, String voterHash, UUID candidateId, String signature, String publicKey) {
         if (voteTransactionRepository.existsByElectionIdAndVoterHash(election.getId(), voterHash)) {
             throw new IllegalStateException("This voter has already voted in this election");
         }
@@ -76,6 +77,7 @@ public class BlockchainService {
                 .electionId(election.getId())
                 .timestamp(now)
                 .signature(signature)
+                .publicKey(publicKey)
                 .mined(false)
                 .build();
 
@@ -143,14 +145,7 @@ public class BlockchainService {
         return Optional.of(savedBlock);
     }
 
-    /**
-     * Mines EVERY remaining pending vote for an election, looping until the
-     * mempool is empty — regardless of whether the usual votes-per-block
-     * threshold is met. Call this when an election closes (manually or via
-     * the auto-close lifecycle check): without it, any votes that never
-     * happened to reach the threshold before closing would sit as "pending"
-     * forever, since nothing else ever triggers mining once voting stops.
-     */
+    
     @Transactional
     public void mineAllPending(Election election, String validatorId) {
         int blocksMined = 0;
@@ -223,9 +218,26 @@ public class BlockchainService {
                         + " previousHash does not match the prior block's hash — chain link broken");
             }
 
-            List<String> actualTxHashes = voteTransactionRepository.findByBlockId(block.getId()).stream()
+            // Same order the block was mined in (oldest first) so the merkle root is reproducible
+            List<VoteTransaction> blockTxs = voteTransactionRepository.findByBlockId(block.getId()).stream()
+                    .sorted(Comparator.comparing(VoteTransaction::getTimestamp))
+                    .collect(Collectors.toList());
+            List<String> actualTxHashes = blockTxs.stream()
                     .map(VoteTransaction::getTransactionHash)
                     .collect(Collectors.toList());
+
+            // Digital signatures: a vote whose candidate was altered no longer verifies.
+            // Votes without a signature/key (cast before this feature) are skipped.
+            for (VoteTransaction tx : blockTxs) {
+                if (tx.getSignature() != null && tx.getPublicKey() != null) {
+                    String payload = SignatureUtil.payload(tx.getElectionId(), tx.getCandidateId());
+                    if (!SignatureUtil.verify(tx.getPublicKey(), payload, tx.getSignature())) {
+                        result.addError("Block #" + block.getBlockIndex() + " vote "
+                                + tx.getTransactionHash().substring(0, 10)
+                                + "… has an invalid signature — the vote was altered or forged");
+                    }
+                }
+            }
             String recomputedMerkleRoot = MerkleTree.computeMerkleRoot(actualTxHashes);
 
             if (!recomputedMerkleRoot.equals(block.getMerkleRoot())) {

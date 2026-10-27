@@ -12,15 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * A registered voter (or admin) in the system.
- *
- * Security note: we NEVER store the raw national ID / Aadhar number here.
- * `voterIdHash` is a one-way SHA-256 hash of it, so even a database admin
- * cannot reverse it back to the real ID. The same hash is what gets embedded
- * (anonymously) into each VoteTransaction, letting us prove "this registered
- * voter voted" without ever linking identity to candidate choice in one place.
- */
+
 @Entity
 @Table(name = "voters")
 @Getter
@@ -57,9 +49,15 @@ public class Voter {
     @Builder.Default
     private boolean verified = false;
 
-    
     @Builder.Default
     private boolean hasVoted = false;
+
+    /**
+     * Base64 SPKI ECDSA P-256 public key, registered once from the voter's browser.
+     * The matching private key never leaves the voter's device.
+     */
+    @Column(length = 1000)
+    private String publicKey;
 
     @CreationTimestamp
     @Column(updatable = false)

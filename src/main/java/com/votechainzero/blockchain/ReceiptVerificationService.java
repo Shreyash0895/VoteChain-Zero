@@ -47,6 +47,14 @@ public class ReceiptVerificationService {
         List<MerkleTree.ProofStep> proof = MerkleTree.buildProof(leaves, index);
         boolean valid = MerkleTree.applyProof(hash, proof).equals(block.getMerkleRoot());
 
+        Boolean signatureValid = null;
+        String fingerprint = null;
+        if (tx.getSignature() != null && tx.getPublicKey() != null) {
+            signatureValid = SignatureUtil.verify(tx.getPublicKey(),
+                    SignatureUtil.payload(tx.getElectionId(), tx.getCandidateId()), tx.getSignature());
+            fingerprint = SignatureUtil.fingerprint(tx.getPublicKey());
+        }
+
         return ReceiptVerificationResponse.builder()
                 .status("CONFIRMED")
                 .electionId(electionId)
@@ -60,6 +68,8 @@ public class ReceiptVerificationService {
                         .map(s -> new ReceiptVerificationResponse.Step(s.hash(), s.position()))
                         .toList())
                 .proofValid(valid)
+                .signatureValid(signatureValid)
+                .signerFingerprint(fingerprint)
                 .build();
     }
 }

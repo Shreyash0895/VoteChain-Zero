@@ -13,25 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Catches exceptions thrown anywhere in a controller/service and turns
- * them into one consistent JSON shape (ErrorResponse) instead of Spring's
- * default behavior — which, for an unhandled exception, is either a raw
- * stack trace (dev) or a bare generic error page (prod). Neither is
- * something a frontend should have to parse.
- *
- * Mapping choices, and why:
- *   - IllegalArgumentException  -> 400  ("election not found", "invalid input")
- *   - IllegalStateException     -> 409  ("already voted", "election not ACTIVE") —
- *     409 Conflict because these are almost always "the request is fine,
- *     but the current state of the world doesn't allow it right now"
- *   - MethodArgumentNotValidException -> 400 with a list of exactly which
- *     fields failed @Valid checks (e.g. RegisterRequest's @NotBlank/@Email)
- *   - AccessDeniedException     -> 403  (a non-admin hit an admin-only endpoint)
- *   - anything else             -> 500, logged in full server-side, but the
- *     client only ever sees a generic message — never leaks internal
- *     details like table names or stack traces to the outside world
- */
+
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {

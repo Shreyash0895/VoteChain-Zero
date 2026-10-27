@@ -48,19 +48,7 @@ public class ChainExplorerService {
                 .build();
     }
 
-    /**
-     * DEMO ONLY — deliberately corrupts the genesis block's merkleRoot
-     * directly in the database, WITHOUT re-mining a valid hash to match.
-     * This simulates exactly what the whole chain design defends against:
-     * an attacker who can edit a database row directly, but can't redo the
-     * computationally expensive Proof-of-Work to produce a hash that's
-     * still internally consistent with the tampered data.
-     *
-     * Deliberately bypasses BlockchainService entirely — going through it
-     * would just mine a new, valid block, which defeats the point. This
-     * writes directly via the repository, the same way a real attacker
-     * with raw database access would.
-     */
+   
     @Transactional
     public TamperSimulationResponse simulateTamper(UUID electionId) {
         List<Block> blocks = blockRepository.findByElectionIdOrderByBlockIndexAsc(electionId);
