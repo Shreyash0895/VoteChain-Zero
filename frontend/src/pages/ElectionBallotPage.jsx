@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import client, { extractErrorMessage } from '../api/client'
 import CandidateAvatar from '../components/CandidateAvatar'
+import ElectionResults from '../components/ElectionResults'
 import { getElectionPhase } from '../utils/electionPhase'
 import { signVote, currentVoterKey } from '../utils/voteSigner'
 
@@ -98,6 +99,13 @@ export default function ElectionBallotPage() {
             Verify my vote →
           </Link>
         </div>
+      ) : phase === 'CLOSED' ? (
+        <>
+          <p className="text-paper-dim text-sm mb-6">
+            Voting has closed. Final results are public and verified on the chain.
+          </p>
+          <ElectionResults election={election} />
+        </>
       ) : (
         <>
           {!votingOpen && (

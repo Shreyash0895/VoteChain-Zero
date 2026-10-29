@@ -60,7 +60,15 @@ public class VoteCountPrivacyAdvice implements ResponseBodyAdvice<Object> {
 
     private void strip(JsonNode node) {
         if (node instanceof ObjectNode obj) {
-            obj.remove(HIDDEN);
+            boolean closed = "CLOSED".equals(obj.path("status").asText());
+            JsonNode candidates = obj.get("candidates");
+            if (candidates instanceof ArrayNode arr && !closed) {
+                arr.forEach(c -> {
+                    if (c instanceof ObjectNode co) {
+                        co.remove(HIDDEN);
+                    }
+                });
+            }
             obj.elements().forEachRemaining(this::strip);
         } else if (node instanceof ArrayNode arr) {
             arr.elements().forEachRemaining(this::strip);
