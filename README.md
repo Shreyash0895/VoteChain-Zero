@@ -1,8 +1,10 @@
 # VoteChain Zero
 
+![CI](https://github.com/<your-username>/<your-repo>/actions/workflows/ci.yml/badge.svg)
+
 A tamper-evident, blockchain-backed voting system. Every vote is a digitally signed transaction mined into a Proof-of-Work chain, so any change to recorded votes is detected automatically, and every voter can independently verify that their vote was counted.
 
-**Stack:** Java 21 · Spring Boot 3.3 · PostgreSQL 16 · Docker Compose · React · Vite · Tailwind CSS · Recharts · WebCrypto (ECDSA)
+**Stack:** Java 21 · Spring Boot 3.3 · PostgreSQL 16 · Docker Compose · React · Vite · Tailwind CSS · Recharts · WebCrypto (ECDSA) · JUnit 5 · Mockito · GitHub Actions
 
 ---
 
@@ -91,6 +93,26 @@ Open http://localhost:5173.
 ### 4. Log in
 - Admin: the `ADMIN_EMAIL` and `ADMIN_PASSWORD` from `.env`
 - Voters: register from the sign-up page
+
+---
+
+## Testing and CI
+
+### Unit tests
+Run the backend tests with:
+```
+mvn test
+```
+The suite covers:
+- **Hashing:** known SHA-256 vectors and the Proof-of-Work difficulty check
+- **Merkle tree:** empty, single and odd leaf counts, order sensitivity, and proofs that verify for every leaf at tree sizes 1 to 17
+- **Signatures:** valid signatures, altered payloads, wrong keys, malformed input, and non-P-256 keys
+- **Blockchain engine** (in-memory fake repositories, no database needed): genesis creation, double-vote prevention, automatic mining at the block threshold, flushing leftover votes on close, chain validation independent of database row order, and detection of tampered blocks, broken hash links, and votes altered after signing
+
+### Continuous integration
+A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request:
+1. **Backend:** Java 21 build and the full test suite (`mvn -B verify`)
+2. **Frontend:** `npm ci` and a production build (`npm run build`)
 
 ---
 
