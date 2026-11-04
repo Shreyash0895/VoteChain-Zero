@@ -140,12 +140,5 @@ Live counts = confirmed (mined) votes + pending votes. Only admins can see them 
 | Chain | view and verify chain | Authenticated |
 | Chain | `POST /api/elections/{id}/chain/simulate-tamper` | Admin |
 
----
 
-## Notes
-- A voter's signing key lives in the browser they first voted from. Voting from another browser with the same account is refused.
-- Votes cast before signatures were added have no signature; they are skipped by signature checks.
-- The containers run in the `Asia/Kolkata` timezone so the voting window matches what the UI shows. Change `TZ` in `docker-compose.yml` for another region.
-- Elections flagged as tampered stay flagged; create a new election to test a clean chain.
-- This is a learning and portfolio project, not a production election system.
 
